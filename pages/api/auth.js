@@ -6,7 +6,7 @@ const client = new MongoClient(process.env.MONGO_URI);
 const dbName = "Vinzzyy";
 
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", "https://vinzzyy.my.id/*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
