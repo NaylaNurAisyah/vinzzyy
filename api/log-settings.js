@@ -30,7 +30,7 @@ const LogSchema = new mongoose.Schema({
   time: Date,
 });
 
-const Log = mongoose.models.Log || mongoose.model("Log", LogSchema);
+const Log = mongoose.models.Log || mongoose.model("iplogs", LogSchema);
 
 export default async function handler(req, res) {
   // CORS headers
