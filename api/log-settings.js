@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-// Cache mongoose biar efisien di serverless
+// Cache mongoose
 let cached = global.mongoose;
 if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
@@ -33,7 +33,7 @@ const LogSchema = new mongoose.Schema({
 const Log = mongoose.models.Log || mongoose.model("Log", LogSchema);
 
 export default async function handler(req, res) {
-  // ====== CORS HEADERS ======
+  // CORS headers
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*"); 
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
@@ -47,8 +47,31 @@ export default async function handler(req, res) {
     await connectMongo();
 
     if (req.method === "POST") {
+      const { ip, city, region, country } = req.body;
+
+      // cek apakah sudah ada log dengan IP + city + region + country di hari yang sama
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const existing = await Log.findOne({
+        ip,
+        city,
+        region,
+        country,
+        time: { $gte: startOfDay }
+      });
+
+      if (existing) {
+        return res.status(200).json({
+          success: true,
+          skipped: true,
+          message: "Log sudah ada, tidak disimpan ulang."
+        });
+      }
+
       const log = new Log(req.body);
       await log.save();
+
       return res.status(200).json({ success: true, log });
     }
 
