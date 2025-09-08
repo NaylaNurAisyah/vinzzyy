@@ -1,10 +1,15 @@
 import { MongoClient } from "mongodb";
 import fetch from "node-fetch";
 
-const uri = process.env.MONGO_URI; // MongoDB Atlas URI
+const uri = process.env.MONGODB_URI; // MongoDB Atlas URI
 const client = new MongoClient(uri);
 
 export default async function handler(req, res) {
+  // CORS headers
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*"); 
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   try {
     await client.connect();
     const db = client.db("Database_Vinzzyy");
