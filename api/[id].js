@@ -2,11 +2,12 @@ import fetch from 'node-fetch';
 
 export default async function handler(req, res) {
   const id = req.url.split("/").pop(); // manual ambil id
-
   // CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*"); 
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   res.setHeader("Vary", "Origin");
 
   if (req.method === "OPTIONS") return res.status(200).end();
