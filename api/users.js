@@ -5,9 +5,16 @@ const uri = process.env.MONGODB_URI; // MongoDB Atlas URI
 const client = new MongoClient(uri);
 
 export default async function handler(req, res) {
+  // CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  // Preflight (OPTIONS)
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   try {
     await client.connect();
     const db = client.db("Database_Vinzzyy");
@@ -47,16 +54,15 @@ export default async function handler(req, res) {
       if (!username) return res.status(400).json({ error: "Username diperlukan" });
 
       // cek ke Roblox API → ambil id
-      const search = await fetch(
-        `https://users.roblox.com/v1/usernames/users`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ usernames: [username] }),
-        }
-      );
+      const search = await fetch(`https://users.roblox.com/v1/usernames/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usernames: [username] }),
+      });
       const searchData = await search.json();
-      if (!searchData?.data?.length) return res.status(404).json({ error: "Username tidak ditemukan" });
+      if (!searchData?.data?.length) {
+        return res.status(404).json({ error: "Username tidak ditemukan" });
+      }
 
       const { id, name, displayName } = searchData.data[0];
 
@@ -80,10 +86,10 @@ export default async function handler(req, res) {
       return res.status(200).json({ message: "User berhasil dihapus" });
     }
 
-    res.status(405).json({ error: "Method tidak diizinkan" });
+    return res.status(405).json({ error: "Method tidak diizinkan" });
   } catch (err) {
     console.error("API error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   } finally {
     await client.close();
   }
