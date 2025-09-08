@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// Cache mongoose biar efisien di serverless
 let cached = global.mongoose;
 if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
@@ -17,6 +18,7 @@ async function connectMongo() {
   return cached.conn;
 }
 
+// Schema & Model
 const LogSchema = new mongoose.Schema({
   ip: String,
   city: String,
@@ -31,24 +33,32 @@ const LogSchema = new mongoose.Schema({
 const Log = mongoose.models.Log || mongoose.model("Log", LogSchema);
 
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  // ====== CORS HEADERS ======
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*"); 
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
-    return res.status(200).end(); // fix preflight
-  }
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(200).end();
   }
 
   try {
     await connectMongo();
-    const log = new Log(req.body);
-    await log.save();
-    res.status(200).json({ success: true });
+
+    if (req.method === "POST") {
+      const log = new Log(req.body);
+      await log.save();
+      return res.status(200).json({ success: true, log });
+    }
+
+    if (req.method === "GET") {
+      const logs = await Log.find().sort({ time: -1 }).limit(20);
+      return res.status(200).json({ success: true, logs });
+    }
+
+    return res.status(405).json({ error: "Method not allowed" });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    return res.status(500).json({ success: false, error: err.message });
   }
 }
