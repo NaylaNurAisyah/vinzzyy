@@ -1,4 +1,5 @@
-import { connectToDatabase } from "../../lib/mongodb";
+import { MongoClient } from "mongodb";
+
 import jwt from "jsonwebtoken";
 
 export default async function handler(req, res) {
@@ -8,7 +9,7 @@ export default async function handler(req, res) {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const { db } = await connectToDatabase();
+    const { db } = await MongoClient();
     const user = await db.collection("users").findOne({ email: decoded.email });
 
     if (!user || user.role !== "admin") {
