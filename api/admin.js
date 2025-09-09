@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const { db } = await MongoClient();
-    const user = await db.collection("users").findOne({ email: decoded.email });
+    const user = await db.collection("UserData").findOne({ email: decoded.email });
 
     if (!user || user.role !== "admin") {
       return res.status(403).json({ message: "Forbidden: Admin only" });
