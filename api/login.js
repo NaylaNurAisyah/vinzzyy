@@ -65,6 +65,7 @@ export default async function handler(req, res) {
           email,
           password: hashed,
           isVerified: false,
+          role: "member",
           otp: otpCode,
           otpExpires: new Date(Date.now() + 15 * 60 * 1000), // 15 menit
         });
