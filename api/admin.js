@@ -3,6 +3,15 @@ import { MongoClient } from "mongodb";
 import jwt from "jsonwebtoken";
 
 export default async function handler(req, res) {
+  // Set CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "https://vinzzyy.my.id"); 
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  // Preflight request (OPTIONS)
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
   try {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) return res.status(401).json({ message: "Unauthorized" });
